@@ -1,21 +1,12 @@
 MODEL:
   META_ARCHITECTURE: "GeneralizedRCNN"
   ATTRIBUTE_ON: True
-  RESNETS:
-    OUT_FEATURES: ["res5"]
-    RES5_DILATION: 2
   RPN:
-    IN_FEATURES: ["res5"]
     PRE_NMS_TOPK_TEST: 6000
     POST_NMS_TOPK_TEST: 1000
   ROI_HEADS:
-    NAME: "AttributeStandardROIHeads"
-    IN_FEATURES: ["res5"]
+    NAME: "AttributeRes5ROIHeads"
     NUM_CLASSES: 1600
-  ROI_BOX_HEAD:
-    NAME: "FastRCNNConvFCHead"
-    NUM_FC: 2
-    POOLER_RESOLUTION: 1
 DATASETS:
   TRAIN: ("visual_genome_train", "visual_genome_val")
   TEST: ("visual_genome_test",)
