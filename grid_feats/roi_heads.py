@@ -1,19 +1,24 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved
 import torch
 from torch import nn
 from torch.nn import functional as F
 
+from detectron2.layers import ShapeSpec
 from detectron2.modeling.roi_heads import (
+    build_box_head,
+    build_mask_head,
+    select_foreground_proposals,
     ROI_HEADS_REGISTRY,
     ROIHeads,
     Res5ROIHeads,
     StandardROIHeads,
 )
+from detectron2.modeling.roi_heads.fast_rcnn import FastRCNNOutputLayers, FastRCNNOutputs
+from detectron2.modeling.poolers import ROIPooler
 
 
 class AttributePredictor(nn.Module):
-	"""
+    """
     Head for attribute prediction, including feature/score computation and
     loss computation.
 
@@ -68,7 +73,7 @@ class AttributePredictor(nn.Module):
 
 
 class AttributeROIHeads(ROIHeads):
-	"""
+    """
     An extension of ROIHeads to include attribute prediction.
     """
     def forward_attribute_loss(self, proposals, box_features):
@@ -84,13 +89,13 @@ class AttributeROIHeads(ROIHeads):
 
 @ROI_HEADS_REGISTRY.register()
 class AttributeRes5ROIHeads(AttributeROIHeads, Res5ROIHeads):
-	"""
+    """
     An extension of Res5ROIHeads to include attribute prediction.
     """
     def __init__(self, cfg, input_shape):
-    	super(Res5ROIHeads, self).__init__(cfg, input_shape)
+        super(Res5ROIHeads, self).__init__(cfg, input_shape)
 
-    	assert len(self.in_features) == 1
+        assert len(self.in_features) == 1
 
         # fmt: off
         pooler_resolution = cfg.MODEL.ROI_BOX_HEAD.POOLER_RESOLUTION
@@ -111,7 +116,7 @@ class AttributeRes5ROIHeads(AttributeROIHeads, Res5ROIHeads):
 
         self.res5, out_channels = self._build_res5_block(cfg)
         self.box_predictor = FastRCNNOutputLayers(
-            out_channels, self.num_classes, self.cls_agnostic_bbox_reg
+            cfg, ShapeSpec(channels=out_channels, height=1, width=1)
         )
 
         if self.mask_on:
@@ -136,19 +141,11 @@ class AttributeRes5ROIHeads(AttributeROIHeads, Res5ROIHeads):
             [features[f] for f in self.in_features], proposal_boxes
         )
         feature_pooled = box_features.mean(dim=[2, 3])
-        pred_class_logits, pred_proposal_deltas = self.box_predictor(feature_pooled)
-
-        outputs = FastRCNNOutputs(
-            self.box2box_transform,
-            pred_class_logits,
-            pred_proposal_deltas,
-            proposals,
-            self.smooth_l1_beta,
-        )
+        predictions = self.box_predictor(feature_pooled)
 
         if self.training:
             del features
-            losses = outputs.losses()
+            losses = self.box_predictor.losses(predictions, proposals)
 
             if self.mask_on:
                 proposals, fg_selection_masks = select_foreground_proposals(
@@ -159,11 +156,11 @@ class AttributeRes5ROIHeads(AttributeROIHeads, Res5ROIHeads):
                 losses.update(self.mask_head(mask_features, proposals))
 
             if self.attribute_on:
-                losses.update(self.forward_attribute_loss(proposals, box_features))
+                losses.update(self.forward_attribute_loss(proposals, feature_pooled))
 
             return [], losses
         else:
-            pred_instances, _ = outputs.inference(
+            pred_instances, _ = self.box_predictor.inference(
                 self.test_score_thresh, self.test_nms_thresh, self.test_detections_per_img
             )
             pred_instances = self.forward_with_given_boxes(features, pred_instances)
@@ -172,11 +169,14 @@ class AttributeRes5ROIHeads(AttributeROIHeads, Res5ROIHeads):
 
 @ROI_HEADS_REGISTRY.register()
 class AttributeStandardROIHeads(AttributeROIHeads, StandardROIHeads):
-	"""
+    """
     An extension of StandardROIHeads to include attribute prediction.
     """
     def __init__(self, cfg, input_shape):
-    	StandardROIHeads.__init__(cfg, input_shape)
+        super(StandardROIHeads, self).__init__(cfg, input_shape)
+        self._init_box_head(cfg, input_shape)
+        self._init_mask_head(cfg, input_shape)
+        self._init_keypoint_head(cfg, input_shape)
 
     def _init_box_head(self, cfg, input_shape):
         # fmt: off
@@ -201,40 +201,32 @@ class AttributeStandardROIHeads(AttributeROIHeads, StandardROIHeads):
         self.box_head = build_box_head(
             cfg, ShapeSpec(channels=in_channels, height=pooler_resolution, width=pooler_resolution)
         )
-        self.box_predictor = FastRCNNOutputLayers(
-            self.box_head.output_size, self.num_classes, self.cls_agnostic_bbox_reg
-        )
+        self.box_predictor = FastRCNNOutputLayers(cfg, self.box_head.output_shape)
 
         if self.attribute_on:
-            self.attribute_predictor = AttributePredictor(cfg, self.box_head.output_size)
+            self.attribute_predictor = AttributePredictor(cfg, self.box_head.output_shape.channels)
 
     def _forward_box(self, features, proposals):
         features = [features[f] for f in self.in_features]
         box_features = self.box_pooler(features, [x.proposal_boxes for x in proposals])
         box_features = self.box_head(box_features)
-        pred_class_logits, pred_proposal_deltas = self.box_predictor(box_features)
+        predictions = self.box_predictor(box_features)
 
-        outputs = FastRCNNOutputs(
-            self.box2box_transform,
-            pred_class_logits,
-            pred_proposal_deltas,
-            proposals,
-            self.smooth_l1_beta,
-        )
         if self.training:
             if self.train_on_pred_boxes:
                 with torch.no_grad():
-                    pred_boxes = outputs.predict_boxes_for_gt_classes()
+                    pred_boxes = self.box_predictor.predict_boxes_for_gt_classes()
                     for proposals_per_image, pred_boxes_per_image in zip(proposals, pred_boxes):
                         proposals_per_image.proposal_boxes = Boxes(pred_boxes_per_image)
-            losses = outputs.losses()
+            losses = self.box_predictor.losses(predictions, proposals)
 
             if self.attribute_on:
                 losses.update(self.forward_attribute_loss(proposals, box_features))
+                del box_features
 
             return losses
         else:
-            pred_instances, _ = outputs.inference(
+            pred_instances, _ = self.box_predictor.inference(
                 self.test_score_thresh, self.test_nms_thresh, self.test_detections_per_img
             )
             return pred_instances

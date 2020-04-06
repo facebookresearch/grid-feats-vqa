@@ -1,0 +1,15 @@
+_BASE_: "Base-RCNN-1x1.yaml"
+MODEL:
+  WEIGHTS: "detectron2://ImageNetPretrained/MSRA/R-50.pkl"
+  RESNETS:
+    DEPTH: 50
+DATASETS:
+  TRAIN: ("visual_genome_val",)
+  TEST: ("visual_genome_test",)
+SOLVER:
+  IMS_PER_BATCH: 2
+  BASE_LR: 0.002
+  STEPS: (100, 200)
+  MAX_ITER: 250
+DATALOADER:
+  NUM_WORKERS: 1

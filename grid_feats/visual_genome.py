@@ -1,13 +1,22 @@
 # -*- coding: utf-8 -*-
 # Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved
+import contextlib
+import io
+import logging
 import os
+from fvcore.common.file_io import PathManager
+from fvcore.common.timer import Timer
 
 from detectron2.data import DatasetCatalog, MetadataCatalog
+from detectron2.structures import BoxMode
+
+
+logger = logging.getLogger(__name__)
 
 def load_coco_with_attributes_json(json_file, 
-								   image_root, 
-								   dataset_name=None, 
-								   extra_annotation_keys=None):
+                                   image_root, 
+                                   dataset_name=None, 
+                                   extra_annotation_keys=None):
     """
     Extend load_coco_json() with additional support for attributes
     """
@@ -110,8 +119,8 @@ Category ids in annotations are not in [1, #categories]! We'll apply a mapping f
 
 def register_coco_instances_with_attributes(name, metadata, json_file, image_root):
     DatasetCatalog.register(name, lambda: load_coco_with_attributes_json(json_file, 
-    																	 image_root, 
-    																	 name))
+                                                                         image_root, 
+                                                                         name))
     MetadataCatalog.get(name).set(
         json_file=json_file, image_root=image_root, evaluator_type="coco", **metadata
     )
@@ -119,11 +128,11 @@ def register_coco_instances_with_attributes(name, metadata, json_file, image_roo
 # ==== Predefined splits for visual genome images ===========
 _PREDEFINED_SPLITS_VG = {
     "visual_genome_train": ("visual_genome/images", 
-    						"visual_genome/annotations/object_and_attributes_train.json"),
+                            "visual_genome/annotations/object_and_attributes_train.json"),
     "visual_genome_val": ("visual_genome/images", 
-    						"visual_genome/annotations/object_and_attributes_val.json"),
+                          "visual_genome/annotations/object_and_attributes_val.json"),
     "visual_genome_test": ("visual_genome/images", 
-    						"visual_genome/annotations/object_and_attributes_test.json"),
+                           "visual_genome/annotations/object_and_attributes_test.json"),
 }
 
 def register_all_vg(root):

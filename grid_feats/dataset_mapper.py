@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved
 import copy
 import logging
@@ -10,13 +9,22 @@ from PIL import Image
 from detectron2.data import detection_utils as utils
 from detectron2.data import transforms as T
 from detectron2.data import DatasetMapper
+from detectron2.structures import (
+    BitMasks,
+    Boxes,
+    BoxMode,
+    Instances,
+    Keypoints,
+    PolygonMasks,
+    polygons_to_bitmask,
+)
 
 
 def annotations_to_instances_with_attributes(annos, 
-											 image_size, 
-											 mask_format="polygon", 
-											 load_attributes=False, 
-											 max_attr_per_ins=16):
+                                             image_size, 
+                                             mask_format="polygon", 
+                                             load_attributes=False, 
+                                             max_attr_per_ins=16):
     """
     Extend the function annotations_to_instances() to support attributes
     """
@@ -77,13 +85,13 @@ def annotations_to_instances_with_attributes(annos,
 
 
 class AttributeDatasetMapper(DatasetMapper):
-	"""
-	Extend DatasetMapper to support attributes.
     """
-	def __init__(self, cfg, is_train=True):
-		super().__init__(cfg, is_train)
+    Extend DatasetMapper to support attributes.
+    """
+    def __init__(self, cfg, is_train=True):
+        super().__init__(cfg, is_train)
 
-		# fmt: off
+        # fmt: off
         self.attribute_on      = cfg.MODEL.ATTRIBUTE_ON
         self.max_attr_per_ins  = cfg.INPUT.MAX_ATTR_PER_INS
         # fmt: on
