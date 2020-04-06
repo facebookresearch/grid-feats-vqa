@@ -146,7 +146,6 @@ class AttributeRes5ROIHeads(AttributeROIHeads, Res5ROIHeads):
         if self.training:
             del features
             losses = self.box_predictor.losses(predictions, proposals)
-
             if self.mask_on:
                 proposals, fg_selection_masks = select_foreground_proposals(
                     proposals, self.num_classes
@@ -154,15 +153,11 @@ class AttributeRes5ROIHeads(AttributeROIHeads, Res5ROIHeads):
                 mask_features = box_features[torch.cat(fg_selection_masks, dim=0)]
                 del box_features
                 losses.update(self.mask_head(mask_features, proposals))
-
             if self.attribute_on:
                 losses.update(self.forward_attribute_loss(proposals, feature_pooled))
-
             return [], losses
         else:
-            pred_instances, _ = self.box_predictor.inference(
-                self.test_score_thresh, self.test_nms_thresh, self.test_detections_per_img
-            )
+            pred_instances, _ = self.box_predictor.inference(predictions, proposals)
             pred_instances = self.forward_with_given_boxes(features, pred_instances)
             return pred_instances, {}
 
@@ -215,18 +210,18 @@ class AttributeStandardROIHeads(AttributeROIHeads, StandardROIHeads):
         if self.training:
             if self.train_on_pred_boxes:
                 with torch.no_grad():
-                    pred_boxes = self.box_predictor.predict_boxes_for_gt_classes()
+                    pred_boxes = self.box_predictor.predict_boxes_for_gt_classes(
+                        predictions, proposals
+                    )
                     for proposals_per_image, pred_boxes_per_image in zip(proposals, pred_boxes):
                         proposals_per_image.proposal_boxes = Boxes(pred_boxes_per_image)
             losses = self.box_predictor.losses(predictions, proposals)
-
             if self.attribute_on:
                 losses.update(self.forward_attribute_loss(proposals, box_features))
                 del box_features
 
             return losses
         else:
-            pred_instances, _ = self.box_predictor.inference(
-                self.test_score_thresh, self.test_nms_thresh, self.test_detections_per_img
-            )
+            pred_instances, _ = self.box_predictor.inference(predictions, proposals)
             return pred_instances
+
