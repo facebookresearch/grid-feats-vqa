@@ -21,7 +21,7 @@ def add_attribute_config(cfg):
     cfg.MODEL.ROI_ATTRIBUTE_HEAD.OBJ_EMBED_DIM = 256
     # Dimension of the hidden fc layer of the input visual features
     cfg.MODEL.ROI_ATTRIBUTE_HEAD.FC_DIM = 512
-    # Loss weight for attribute prediction
-    cfg.MODEL.ROI_ATTRIBUTE_HEAD.LOSS_WEIGHT = 0.5
+    # Loss weight for attribute prediction, 0.2 is best per analysis
+    cfg.MODEL.ROI_ATTRIBUTE_HEAD.LOSS_WEIGHT = 0.2
     # Number of classes for attributes
     cfg.MODEL.ROI_ATTRIBUTE_HEAD.NUM_CLASSES = 400
