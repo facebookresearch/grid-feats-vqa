@@ -14,7 +14,7 @@ This is a feature pre-training code release of the [paper](https://arxiv.org/abs
   year={2020}
 }
 ```
-For more sustained maintenance, we release code using [Detectron2](https://github.com/facebookresearch/detectron2) instead of [mask-rcnn-benchmark](https://github.com/facebookresearch/maskrcnn-benchmark) which the original code is based on. The current repository should reproduce the results reported in the paper, *e.g.*, produce **~72.5** single model VQA score for a X-101 backbone paired with [MCAN](https://github.com/MILVLG/mcan-vqa)-large.
+For more sustained maintenance, we release code using [Detectron2](https://github.com/facebookresearch/detectron2) instead of [mask-rcnn-benchmark](https://github.com/facebookresearch/maskrcnn-benchmark) which the original code is based on. The current repository should reproduce the results reported in the paper, *e.g.*, reporting **~72.5** single model VQA score for a X-101 backbone paired with [MCAN](https://github.com/MILVLG/mcan-vqa)-large.
 
 ## Installation
 Install Detectron 2 following [INSTALL.md](https://github.com/facebookresearch/detectron2/blob/master/INSTALL.md). Then clone this repository:
@@ -46,6 +46,6 @@ The final model by default should be saved under `./outputs` of your current wor
 # Pre-Trained Models
 We release two models 
 | Backbone | AP<sub>50:95</sub> | download |
-| -------- | ------- | -------- |
-| R50      | 3.2 | <a href="https://dl.fbaipublicfiles.com/grid-feats-vqa/R-50/model_final.pth">model</a>&nbsp;\| &nbsp;<a href="https://dl.fbaipublicfiles.com/grid-feats-vqa/R-50/metrics.json">metrics</a> |
+| -------- | ---- | -------- |
+| R-50     | 3.2 | <a href="https://dl.fbaipublicfiles.com/grid-feats-vqa/R-50/model_final.pth">model</a>&nbsp;\| &nbsp;<a href="https://dl.fbaipublicfiles.com/grid-feats-vqa/R-50/metrics.json">metrics</a> |
 | X-101    | ?? | <a href="https://dl.fbaipublicfiles.com/grid-feats-vqa/X-101/model_final.pth">model</a>&nbsp;\| &nbsp;<a href="https://dl.fbaipublicfiles.com/grid-feats-vqa/X-101/metrics.json">metrics</a> |
