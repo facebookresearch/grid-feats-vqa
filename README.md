@@ -23,7 +23,7 @@ git clone git@github.com:facebookresearch/grid-feats-vqa.git
 ```
 
 ## Data
-[Visual Genome](http://visualgenome.org/) split released from the bottom-up-attention [code](https://github.com/peteanderson80/bottom-up-attention) are used for pre-training. They are prepared in [COCO](http://cocodataset.org/) format and include an additional field for `attribute` prediction. We provide the `.json` files [here](https://dl.fbaipublicfiles.com/grid-feats-vqa/json/visual_genome.tgz). Same as in Detectron2, the expected dataset structure under the `DETECTRON2_DATASETS` (default is `./datasets` relative to your current working directory) folder should be:
+[Visual Genome](http://visualgenome.org/) `train+val` splits released from the bottom-up-attention [code](https://github.com/peteanderson80/bottom-up-attention) are used for pre-training, and `test` split is used for evaluating detection performance. All of them are prepared in [COCO](http://cocodataset.org/) format but include an additional field for `attribute` prediction. We provide the `.json` files [here](https://dl.fbaipublicfiles.com/grid-feats-vqa/json/visual_genome.tgz) which can be directly loaded by Detectron2. Same as in Detectron2, the expected dataset structure under the `DETECTRON2_DATASETS` (default is `./datasets` relative to your current working directory) folder should be:
 ```
 visual_genome/
   annotations/
