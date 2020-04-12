@@ -13,7 +13,7 @@ from detectron2.modeling.roi_heads import (
     Res5ROIHeads,
     StandardROIHeads,
 )
-from detectron2.modeling.roi_heads.fast_rcnn import FastRCNNOutputLayers, FastRCNNOutputs
+from detectron2.modeling.roi_heads.fast_rcnn import FastRCNNOutputLayers
 from detectron2.modeling.poolers import ROIPooler
 
 
