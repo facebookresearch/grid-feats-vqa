@@ -14,7 +14,7 @@ This is a feature pre-training code release of the [paper](https://arxiv.org/abs
   year={2020}
 }
 ```
-For more sustained maintenance, we release code using [Detectron2](https://github.com/facebookresearch/detectron2) instead of [mask-rcnn-benchmark](https://github.com/facebookresearch/maskrcnn-benchmark) which the original code is based on. The current repository should reproduce the results reported in the paper, *e.g.*, produce **~72.5** VQA score for a X-101 backbone paired with [MCAN](https://github.com/MILVLG/mcan-vqa)-large.
+For more sustained maintenance, we release code using [Detectron2](https://github.com/facebookresearch/detectron2) instead of [mask-rcnn-benchmark](https://github.com/facebookresearch/maskrcnn-benchmark) which the original code is based on. The current repository should reproduce the results reported in the paper, *e.g.*, produce **~72.5** single model VQA score for a X-101 backbone paired with [MCAN](https://github.com/MILVLG/mcan-vqa)-large.
 
 ## Installation
 Install Detectron 2 following [INSTALL.md](https://github.com/facebookresearch/detectron2/blob/master/INSTALL.md). Then clone this repository:
@@ -33,17 +33,15 @@ visual_genome/
 ```
 
 ## Training
-Once the dataset is setup, to train a model, run:
+Once the dataset is setup, to train a model, run (by default we use 8 GPUs):
 ```bash
 python grid-feats-vqa/train_net.py --num-gpus 8 --config-file <config.yaml>
 ```
-By default we use 8 GPUs.
-
 For example, to launch pre-training with ResNet-50 backbone on 8 GPUs, one should execute:
 ```bash
 python grid-feats-vqa/train_net.py --num-gpus 8 --config-file configs/R-50-grid.yaml
 ```
-The final model by default should be under `./outputs` under your current working directory
+The final model by default should be saved under `./outputs` of your current working directory once it is done training.
 
 # Pre-Trained Models
 We release two models 
