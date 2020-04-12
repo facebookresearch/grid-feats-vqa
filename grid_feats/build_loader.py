@@ -5,7 +5,7 @@ import torch.utils.data
 
 from detectron2.utils.comm import get_world_size
 from detectron2.data import samplers
-from detectron2.data.build import get_detection_dataset_dicts, worker_init_reset_seed
+from detectron2.data.build import get_detection_dataset_dicts, worker_init_reset_seed, trivial_batch_collator
 from detectron2.data.common import AspectRatioGroupedDataset, DatasetFromList, MapDataset
 
 from .dataset_mapper import AttributeDatasetMapper

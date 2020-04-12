@@ -1,4 +1,4 @@
-_BASE_: "Base-RCNN-1x1-ms.yaml"
+_BASE_: "Base-RCNN-grid.yaml"
 MODEL:
   WEIGHTS: "detectron2://ImageNetPretrained/FAIR/X-101-32x8d.pkl"
   PIXEL_STD: [57.375, 57.120, 58.395]

@@ -4,9 +4,12 @@ MODEL:
   RPN:
     PRE_NMS_TOPK_TEST: 6000
     POST_NMS_TOPK_TEST: 1000
+    SMOOTH_L1_BETA: 0.11
   ROI_HEADS:
     NAME: "AttributeRes5ROIHeads"
     NUM_CLASSES: 1600
+  ROI_BOX_HEAD:
+    SMOOTH_L1_BETA: 1.
 DATASETS:
   TRAIN: ("visual_genome_train", "visual_genome_val")
   TEST: ("visual_genome_test",)
