@@ -10,7 +10,7 @@ This is a feature pre-training code release of the [paper](https://arxiv.org/abs
 @InProceedings{jiang2020defense,
   title={In Defense of Grid Features for Visual Question Answering},
   author={Jiang, Huaizu and Misra, Ishan and Rohrbach, Marcus and Learned-Miller, Erik and Chen, Xinlei},
-  journal={CVPR},
+  journal={IEEE Conference on Computer Vision and Pattern Recognition (CVPR)},
   year={2020}
 }
 ```
