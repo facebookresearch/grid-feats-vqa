@@ -45,7 +45,7 @@ The final model by default should be saved under `./outputs` of your current wor
 
 # Pre-Trained Models
 We release two models 
-| Backbone | AP | download |
+| Backbone | AP<sub>50:95</sub> | download |
 | -------- | ---- | -------- |
-| R50      | ?? | <a href="https://dl.fbaipublicfiles.com/grid-feats-vqa/R-50/model_final.pth">model</a>&nbsp;\| &nbsp;<a href="https://dl.fbaipublicfiles.com/grid-feats-vqa/R-50/metrics.json">metrics</a> |
+| R50      | 3.2 | <a href="https://dl.fbaipublicfiles.com/grid-feats-vqa/R-50/model_final.pth">model</a>&nbsp;\| &nbsp;<a href="https://dl.fbaipublicfiles.com/grid-feats-vqa/R-50/metrics.json">metrics</a> |
 | X-101    | ?? | <a href="https://dl.fbaipublicfiles.com/grid-feats-vqa/X-101/model_final.pth">model</a>&nbsp;\| &nbsp;<a href="https://dl.fbaipublicfiles.com/grid-feats-vqa/X-101/metrics.json">metrics</a> |
