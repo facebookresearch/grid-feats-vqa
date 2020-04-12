@@ -2,7 +2,7 @@
 **Grid Feature Pre-Training Code**
 
 <p align="center">
-  <img src="http://xinleic.xyz/images/grid-vqa.png" width="700px" />
+  <img src="http://xinleic.xyz/images/grid-vqa.png" width="500" />
 </p>
 
 This is a feature pre-training code release of the [paper](https://arxiv.org/abs/2001.03615):
