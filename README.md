@@ -43,7 +43,7 @@ python grid-feats-vqa/train_net.py --num-gpus 8 --config-file configs/R-50-grid.
 ```
 The final model by default should be saved under `./outputs` of your current working directory once it is done training. We also provide the region-feature pre-training configuration `configs/R-50-updn.yaml` for reference. Note that we use `0.2` attribute loss (`MODEL.ROI_ATTRIBUTE_HEAD.LOSS_WEIGHT = 0.2`), so the object detection/VQA performance is expected to be higher than reported in the paper.
 
-# Pre-Trained Models
+## Pre-Trained Models
 We release two pre-trained models for grid features, one with R-50 backbone, and one with X-101:
 | Backbone | AP<sub>50:95</sub> | download |
 | -------- | ---- | -------- |
