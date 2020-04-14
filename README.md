@@ -17,7 +17,7 @@ This is a feature pre-training code release of the [paper](https://arxiv.org/abs
 For more sustained maintenance, we release code using [Detectron2](https://github.com/facebookresearch/detectron2) instead of [mask-rcnn-benchmark](https://github.com/facebookresearch/maskrcnn-benchmark) which the original code is based on. The current repository should reproduce the results reported in the paper, *e.g.*, reporting **~72.5** single model VQA score for a X-101 backbone paired with [MCAN](https://github.com/MILVLG/mcan-vqa)-large.
 
 ## Installation
-Install Detectron 2 following [INSTALL.md](https://github.com/facebookresearch/detectron2/blob/master/INSTALL.md). Then clone this repository:
+Install Detectron 2 following [INSTALL.md](https://github.com/facebookresearch/detectron2/blob/master/INSTALL.md) (please build Detectron2 from source to include the latest commit for [box_head.output_shape](https://github.com/facebookresearch/detectron2/commit/f1364a83099852be92c48c32618d286e6a1dd85c)). Then clone this repository:
 ```bash
 git clone git@github.com:facebookresearch/grid-feats-vqa.git
 ```
