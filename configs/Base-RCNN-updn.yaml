@@ -9,6 +9,7 @@ MODEL:
     NAME: "AttributeRes5ROIHeads"
     NUM_CLASSES: 1600
   ROI_BOX_HEAD:
+    POOLER_SAMPLING_RATIO: 2
     SMOOTH_L1_BETA: 1.
 DATASETS:
   TRAIN: ("visual_genome_train", "visual_genome_val")

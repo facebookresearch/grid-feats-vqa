@@ -17,6 +17,7 @@ MODEL:
     NAME: "FastRCNNConvFCHead"
     NUM_FC: 2
     POOLER_RESOLUTION: 1
+    POOLER_SAMPLING_RATIO: 2
     SMOOTH_L1_BETA: 1.
 DATASETS:
   TRAIN: ("visual_genome_train", "visual_genome_val")
