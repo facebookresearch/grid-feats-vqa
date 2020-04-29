@@ -20,6 +20,7 @@ For more sustained maintenance, we release code using [Detectron2](https://githu
 Install Detectron 2 following [INSTALL.md](https://github.com/facebookresearch/detectron2/blob/master/INSTALL.md) (please build Detectron2 from source to include the latest commit for [box_head.output_shape](https://github.com/facebookresearch/detectron2/commit/f1364a83099852be92c48c32618d286e6a1dd85c)). Then clone this repository:
 ```bash
 git clone git@github.com:facebookresearch/grid-feats-vqa.git
+cd grid-feats-vqa
 ```
 
 ## Data
@@ -35,20 +36,20 @@ visual_genome/
 ## Training
 Once the dataset is setup, to train a model, run (by default we use 8 GPUs):
 ```bash
-python grid-feats-vqa/train_net.py --num-gpus 8 --config-file <config.yaml>
+python train_net.py --num-gpus 8 --config-file <config.yaml>
 ```
 For example, to launch grid-feature pre-training with ResNet-50 backbone on 8 GPUs, one should execute:
 ```bash
-python grid-feats-vqa/train_net.py --num-gpus 8 --config-file configs/R-50-grid.yaml
+python train_net.py --num-gpus 8 --config-file configs/R-50-grid.yaml
 ```
-The final model by default should be saved under `./outputs` of your current working directory once it is done training. We also provide the region-feature pre-training configuration `configs/R-50-updn.yaml` for reference. Note that we use `0.2` attribute loss (`MODEL.ROI_ATTRIBUTE_HEAD.LOSS_WEIGHT = 0.2`), which is better for down-stream tasks like VQA per our analysis.
+The final model by default should be saved under `./output` of your current working directory once it is done training. We also provide the region-feature pre-training configuration `configs/R-50-updn.yaml` for reference. Note that we use `0.2` attribute loss (`MODEL.ROI_ATTRIBUTE_HEAD.LOSS_WEIGHT = 0.2`), which is better for down-stream tasks like VQA per our analysis.
 
 We also release the configuration (`configs/R-50-updn.yaml`) for training the region features described in **bottom-up-attention** paper, which is a faithful re-implementation of the original [one](https://github.com/peteanderson80/bottom-up-attention) in Detectron2.
 
 ## Feature Extraction
 Grid feature extraction can be done by simply running once the model is trained (or you can directly download our pre-trained models, see below):
 ```bash
-python grid-feats-vqa/extract_feature.py -config-file configs/R-50-grid.yaml --dataset <dataset>
+python extract_feature.py -config-file configs/R-50-grid.yaml --dataset <dataset>
 ```
 and the code will load the final model from `cfg.OUTPUT_DIR` (which one can override in command line) and start extracting features for `<dataset>`, we provide three options for the dataset: `coco_2014_train`, `coco_2014_val` and `coco_2015_test`, they correspond to `train`, `val` and `test` splits of the VQA dataset. The extracted features can be conveniently loaded in [Pythia](https://github.com/facebookresearch/pythia).
 
@@ -59,9 +60,9 @@ We release three pre-trained models for grid features, one with R-50 backbone, o
 
 | Backbone | AP<sub>50:95</sub> | Download |
 | -------- | ---- | -------- |
-| R-50     | 2.9 | <a href="https://dl.fbaipublicfiles.com/grid-feats-vqa/R-50/model_final.pth">model</a>&nbsp;\| &nbsp;<a href="https://dl.fbaipublicfiles.com/grid-feats-vqa/R-50/metrics.json">metrics</a>&nbsp;\| &nbsp;<a href="https://dl.fbaipublicfiles.com/grid-feats-vqa/R-50/features.tgz">features</a> |
-| X-101    | 3.9 | <a href="https://dl.fbaipublicfiles.com/grid-feats-vqa/X-101/model_final.pth">model</a>&nbsp;\| &nbsp;<a href="https://dl.fbaipublicfiles.com/grid-feats-vqa/X-101/metrics.json">metrics</a>&nbsp;\| &nbsp;<a href="https://dl.fbaipublicfiles.com/grid-feats-vqa/X-101/features.tgz">features</a> |
-| X-152    | 4.3 | <a href="https://dl.fbaipublicfiles.com/grid-feats-vqa/X-152/model_final.pth">model</a>&nbsp;\| &nbsp;<a href="https://dl.fbaipublicfiles.com/grid-feats-vqa/X-152/metrics.json">metrics</a>&nbsp;\| &nbsp;<a href="https://dl.fbaipublicfiles.com/grid-feats-vqa/X-152/features.tgz">features</a> |
+| R-50     | 2.9 | <a href="https://dl.fbaipublicfiles.com/grid-feats-vqa/R-50/R-50.pth">model</a>&nbsp;\| &nbsp;<a href="https://dl.fbaipublicfiles.com/grid-feats-vqa/R-50/metrics.json">metrics</a>&nbsp;\| &nbsp;<a href="https://dl.fbaipublicfiles.com/grid-feats-vqa/R-50/features.tgz">features</a> |
+| X-101    | 3.9 | <a href="https://dl.fbaipublicfiles.com/grid-feats-vqa/X-101/X-101.pth">model</a>&nbsp;\| &nbsp;<a href="https://dl.fbaipublicfiles.com/grid-feats-vqa/X-101/metrics.json">metrics</a>&nbsp;\| &nbsp;<a href="https://dl.fbaipublicfiles.com/grid-feats-vqa/X-101/features.tgz">features</a> |
+| X-152    | 4.3 | <a href="https://dl.fbaipublicfiles.com/grid-feats-vqa/X-152/X-152.pth">model</a>&nbsp;\| &nbsp;<a href="https://dl.fbaipublicfiles.com/grid-feats-vqa/X-152/metrics.json">metrics</a>&nbsp;\| &nbsp;<a href="https://dl.fbaipublicfiles.com/grid-feats-vqa/X-152/features.tgz">features</a> |
 
 ## License
 
