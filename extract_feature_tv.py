@@ -14,7 +14,6 @@ import torch.nn as nn
 import torchvision
 from fvcore.common.file_io import PathManager
 
-from detectron2.layers import FrozenBatchNorm2d
 from detectron2.data.detection_utils import read_image
 from detectron2.data import transforms as T
 
@@ -42,7 +41,6 @@ def extract_feature_argument_parser():
 class GridFeaturesTorchVision(torchvision.models.ResNet):
     def __init__(self, _type="R-50", detectron_weights=None):
         kwargs = dict()
-        kwargs["norm_layer"] = FrozenBatchNorm2d
         if _type == "R-50":
             blocks = [3, 4, 6, 3]
         elif _type == "X-101":
@@ -158,17 +156,17 @@ class GridFeaturesTorchVision(torchvision.models.ResNet):
 if __name__ == "__main__":
     args = extract_feature_argument_parser().parse_args()
     print("Command Line Args:", args)
-    # build network
+    # Build network
     net = GridFeaturesTorchVision(args.backbone, 
                                   detectron_weights=args.weights)
-    # read and prepare images
+    net.eval()
+    # Read and prepare images
     image = read_image(args.image, format="BGR")
     tfm_gens = [T.ResizeShortestEdge(600, 1000, "choice")]
     image, _ = T.apply_transform_gens(tfm_gens, image)
     image = torch.as_tensor(np.ascontiguousarray(image.transpose(2, 0, 1)))
-    # apply the network
+    # Apply the network
     res = net(image.unsqueeze(0))
-    # save features
+    # Save features
     with PathManager.open(args.output, "wb") as f:
-        # save as CPU tensors
         torch.save(res.cpu(), f)
