@@ -25,3 +25,11 @@ def add_attribute_config(cfg):
     cfg.MODEL.ROI_ATTRIBUTE_HEAD.LOSS_WEIGHT = 0.2
     # Number of classes for attributes
     cfg.MODEL.ROI_ATTRIBUTE_HEAD.NUM_CLASSES = 400
+
+    """
+    Add config for box regression loss adjustment.
+    """
+    # Loss weights for RPN box regression
+    cfg.MODEL.RPN.BBOX_LOSS_WEIGHT = 1.0
+    # Loss weights for R-CNN box regression
+    cfg.MODEL.ROI_BOX_HEAD.BBOX_LOSS_WEIGHT = 1.0
