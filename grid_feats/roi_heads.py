@@ -1,8 +1,11 @@
 # Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved
+import inspect
+from typing import List, Optional
 import torch
 from torch import nn
 from torch.nn import functional as F
 
+from detectron2.config import configurable
 from detectron2.layers import ShapeSpec
 from detectron2.modeling.roi_heads import (
     build_box_head,
@@ -171,39 +174,61 @@ class AttributeStandardROIHeads(AttributeROIHeads, StandardROIHeads):
     """
     An extension of StandardROIHeads to include attribute prediction.
     """
-    def __init__(self, cfg, input_shape):
-        super(StandardROIHeads, self).__init__(cfg, input_shape)
-        self._init_box_head(cfg, input_shape)
-        self._init_mask_head(cfg, input_shape)
-        self._init_keypoint_head(cfg, input_shape)
+    @configurable
+    def __init__(
+        self,
+        *,
+        box_in_features: List[str],
+        box_pooler: ROIPooler,
+        box_head: nn.Module,
+        box_predictor: nn.Module,
+        mask_in_features: Optional[List[str]] = None,
+        mask_pooler: Optional[ROIPooler] = None,
+        mask_head: Optional[nn.Module] = None,
+        keypoint_in_features: Optional[List[str]] = None,
+        keypoint_pooler: Optional[ROIPooler] = None,
+        keypoint_head: Optional[nn.Module] = None,
+        train_on_pred_boxes: bool = False,
+        attribute_on: bool = False,
+        attribute_predictor: Optional[nn.Module] = None,
+        **kwargs
+    ):
+        super(StandardROIHeads, self).__init__(**kwargs)
+        # keep self.in_features for backward compatibility
+        self.in_features = self.box_in_features = box_in_features
+        self.box_pooler = box_pooler
+        self.box_head = box_head
+        self.box_predictor = box_predictor
 
-    def _init_box_head(self, cfg, input_shape):
-        # fmt: off
-        pooler_resolution        = cfg.MODEL.ROI_BOX_HEAD.POOLER_RESOLUTION
-        pooler_scales            = tuple(1.0 / input_shape[k].stride for k in self.in_features)
-        sampling_ratio           = cfg.MODEL.ROI_BOX_HEAD.POOLER_SAMPLING_RATIO
-        pooler_type              = cfg.MODEL.ROI_BOX_HEAD.POOLER_TYPE
-        self.train_on_pred_boxes = cfg.MODEL.ROI_BOX_HEAD.TRAIN_ON_PRED_BOXES
-        self.attribute_on        = cfg.MODEL.ATTRIBUTE_ON
-        # fmt: on
+        self.mask_on = mask_in_features is not None
+        if self.mask_on:
+            self.mask_in_features = mask_in_features
+            self.mask_pooler = mask_pooler
+            self.mask_head = mask_head
+        self.keypoint_on = keypoint_in_features is not None
+        if self.keypoint_on:
+            self.keypoint_in_features = keypoint_in_features
+            self.keypoint_pooler = keypoint_pooler
+            self.keypoint_head = keypoint_head
 
-        in_channels = [input_shape[f].channels for f in self.in_features]
-        assert len(set(in_channels)) == 1, in_channels
-        in_channels = in_channels[0]
+        self.train_on_pred_boxes = train_on_pred_boxes
 
-        self.box_pooler = ROIPooler(
-            output_size=pooler_resolution,
-            scales=pooler_scales,
-            sampling_ratio=sampling_ratio,
-            pooler_type=pooler_type,
-        )
-        self.box_head = build_box_head(
-            cfg, ShapeSpec(channels=in_channels, height=pooler_resolution, width=pooler_resolution)
-        )
-        self.box_predictor = FastRCNNOutputLayers(cfg, self.box_head.output_shape)
-
+        self.attribute_on = attribute_on
         if self.attribute_on:
-            self.attribute_predictor = AttributePredictor(cfg, self.box_head.output_shape.channels)
+            self.attribute_predictor = attribute_predictor
+
+    @classmethod
+    def from_config(cls, cfg, input_shape):
+        ret = super().from_config(cfg, input_shape)
+        ret["attribute_on"] = cfg.MODEL.ATTRIBUTE_ON
+        return ret
+
+    @classmethod
+    def _init_box_head(cls, cfg, input_shape):
+        ret = StandardROIHeads._init_box_head(cfg, input_shape)
+        if cfg.MODEL.ATTRIBUTE_ON:
+            ret.update({"attribute_predictor": AttributePredictor(cfg, ret["box_head"].output_shape.channels)})
+        return ret
 
     def _forward_box(self, features, proposals):
         features = [features[f] for f in self.in_features]
