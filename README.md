@@ -49,11 +49,11 @@ We also release the configuration (`configs/R-50-updn.yaml`) for training the re
 ## Feature Extraction
 Grid feature extraction can be done by simply running once the model is trained (or you can directly download our pre-trained models, see below):
 ```bash
-python extract_feature.py -config-file configs/R-50-grid.yaml --dataset <dataset>
+python extract_grid_feature.py -config-file configs/R-50-grid.yaml --dataset <dataset>
 ```
 and the code will load the final model from `cfg.OUTPUT_DIR` (which one can override in command line) and start extracting features for `<dataset>`, we provide three options for the dataset: `coco_2014_train`, `coco_2014_val` and `coco_2015_test`, they correspond to `train`, `val` and `test` splits of the VQA dataset. The extracted features can be conveniently loaded in [Pythia](https://github.com/facebookresearch/pythia).
 
-To extract features on your customized dataset, you may want to dump the image information into [COCO](http://cocodataset.org/) `.json` format, and add the dataset information to use `extract_feature.py`, or you can hack `extract_feature.py` and directly loop over images. 
+To extract features on your customized dataset, you may want to dump the image information into [COCO](http://cocodataset.org/) `.json` format, and add the dataset information to use `extract_grid_feature.py`, or you can hack `extract_grid_feature.py` and directly loop over images. 
 
 ## Pre-Trained Models and Features
 We release three pre-trained models for grid features, one with R-50 backbone, one with X-101, and one with X-152. The models can be used directly to extract features. For your convenience, we also release the pre-extracted features for direct download.

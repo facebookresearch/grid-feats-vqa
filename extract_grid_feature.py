@@ -30,7 +30,7 @@ dataset_to_folder_mapper['coco_2014_val'] = 'val2014'
 # at: https://github.com/facebookresearch/detectron2/blob/master/detectron2/data/datasets/builtin.py#L36
 dataset_to_folder_mapper['coco_2015_test'] = 'test2015'
 
-def extract_feature_argument_parser():
+def extract_grid_feature_argument_parser():
     parser = argparse.ArgumentParser(description="Grid feature extraction")
     parser.add_argument("--config-file", default="", metavar="FILE", help="path to config file")
     parser.add_argument("--dataset", help="name of the dataset", default="coco_2014_train",
@@ -43,7 +43,7 @@ def extract_feature_argument_parser():
     )
     return parser
 
-def extract_feature_on_dataset(model, data_loader, dump_folder):
+def extract_grid_feature_on_dataset(model, data_loader, dump_folder):
     for idx, inputs in enumerate(tqdm.tqdm(data_loader)):
         with torch.no_grad():
             image_id = inputs[0]['image_id']
@@ -61,7 +61,7 @@ def do_feature_extraction(cfg, model, dataset_name):
         dump_folder = os.path.join(cfg.OUTPUT_DIR, "features", dataset_to_folder_mapper[dataset_name])
         PathManager.mkdirs(dump_folder)
         data_loader = build_detection_test_loader_with_attributes(cfg, dataset_name)
-        extract_feature_on_dataset(model, data_loader, dump_folder)
+        extract_grid_feature_on_dataset(model, data_loader, dump_folder)
 
 def setup(args):
     """
@@ -88,6 +88,6 @@ def main(args):
 
 
 if __name__ == "__main__":
-    args = extract_feature_argument_parser().parse_args()
+    args = extract_grid_feature_argument_parser().parse_args()
     print("Command Line Args:", args)
     main(args)
