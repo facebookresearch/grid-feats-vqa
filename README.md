@@ -61,13 +61,14 @@ and the code will load the final model from `cfg.OUTPUT_DIR` (which one can over
 To extract features on your customized dataset, you may want to dump the image information into [COCO](http://cocodataset.org/) `.json` format, and add the dataset information to use `extract_grid_feature.py`, or you can hack `extract_grid_feature.py` and directly loop over images. 
 
 ## Pre-Trained Models and Features
-We release three pre-trained models for grid features, one with R-50 backbone, one with X-101, and one with X-152. The models can be used directly to extract features. For your convenience, we also release the pre-extracted features for direct download.
+We release several pre-trained models for grid features: one with R-50 backbone, one with X-101, one with X-152, and one with additional improvements used for the 2020 VQA Challenge (see `X-152-challenge.yaml`). The models can be used directly to extract features. For your convenience, we also release the pre-extracted features for direct download.
 
 | Backbone | AP<sub>50:95</sub> | Download |
 | -------- | ---- | -------- |
 | R-50     | 3.1 | <a href="https://dl.fbaipublicfiles.com/grid-feats-vqa/R-50/R-50.pth">model</a>&nbsp;\| &nbsp;<a href="https://dl.fbaipublicfiles.com/grid-feats-vqa/R-50/metrics.json">metrics</a>&nbsp;\| &nbsp;<a href="https://dl.fbaipublicfiles.com/grid-feats-vqa/R-50/R-50-features.tgz">features</a> |
 | X-101    | 4.3 | <a href="https://dl.fbaipublicfiles.com/grid-feats-vqa/X-101/X-101.pth">model</a>&nbsp;\| &nbsp;<a href="https://dl.fbaipublicfiles.com/grid-feats-vqa/X-101/metrics.json">metrics</a>&nbsp;\| &nbsp;<a href="https://dl.fbaipublicfiles.com/grid-feats-vqa/X-101/X-101-features.tgz">features</a> |
 | X-152    | 4.7 | <a href="https://dl.fbaipublicfiles.com/grid-feats-vqa/X-152/X-152.pth">model</a>&nbsp;\| &nbsp;<a href="https://dl.fbaipublicfiles.com/grid-feats-vqa/X-152/metrics.json">metrics</a>&nbsp;\| &nbsp;<a href="https://dl.fbaipublicfiles.com/grid-feats-vqa/X-152/X-152-features.tgz">features</a> |
+| X-152++  | 3.7 | <a href="https://dl.fbaipublicfiles.com/grid-feats-vqa/X-152++/X-152++.pth">model</a>&nbsp;\| &nbsp;<a href="https://dl.fbaipublicfiles.com/grid-feats-vqa/X-152++/metrics.json">metrics</a>&nbsp;\| &nbsp;<a href="https://dl.fbaipublicfiles.com/grid-feats-vqa/X-152++/X-152++-features.tgz">features</a> |
 
 ## License
 
