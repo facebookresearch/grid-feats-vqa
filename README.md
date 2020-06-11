@@ -68,7 +68,7 @@ We release several pre-trained models for grid features: one with R-50 backbone,
 | R-50     | 3.1 | <a href="https://dl.fbaipublicfiles.com/grid-feats-vqa/R-50/R-50.pth">model</a>&nbsp;\| &nbsp;<a href="https://dl.fbaipublicfiles.com/grid-feats-vqa/R-50/metrics.json">metrics</a>&nbsp;\| &nbsp;<a href="https://dl.fbaipublicfiles.com/grid-feats-vqa/R-50/R-50-features.tgz">features</a> |
 | X-101    | 4.3 | <a href="https://dl.fbaipublicfiles.com/grid-feats-vqa/X-101/X-101.pth">model</a>&nbsp;\| &nbsp;<a href="https://dl.fbaipublicfiles.com/grid-feats-vqa/X-101/metrics.json">metrics</a>&nbsp;\| &nbsp;<a href="https://dl.fbaipublicfiles.com/grid-feats-vqa/X-101/X-101-features.tgz">features</a> |
 | X-152    | 4.7 | <a href="https://dl.fbaipublicfiles.com/grid-feats-vqa/X-152/X-152.pth">model</a>&nbsp;\| &nbsp;<a href="https://dl.fbaipublicfiles.com/grid-feats-vqa/X-152/metrics.json">metrics</a>&nbsp;\| &nbsp;<a href="https://dl.fbaipublicfiles.com/grid-feats-vqa/X-152/X-152-features.tgz">features</a> |
-| X-152++  | 3.7 | <a href="https://dl.fbaipublicfiles.com/grid-feats-vqa/X-152++/X-152++.pth">model</a>&nbsp;\| &nbsp;<a href="https://dl.fbaipublicfiles.com/grid-feats-vqa/X-152++/metrics.json">metrics</a>&nbsp;\| &nbsp;<a href="https://dl.fbaipublicfiles.com/grid-feats-vqa/X-152++/X-152++-features.tgz">features</a> |
+| X-152++  | 3.7 | <a href="https://dl.fbaipublicfiles.com/grid-feats-vqa/X-152pp/X-152pp.pth">model</a>&nbsp;\| &nbsp;<a href="https://dl.fbaipublicfiles.com/grid-feats-vqa/X-152pp/metrics.json">metrics</a>&nbsp;\| &nbsp;<a href="https://dl.fbaipublicfiles.com/grid-feats-vqa/X-152pp/X-152pp-features.tgz">features</a> |
 
 ## License
 
