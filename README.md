@@ -74,20 +74,23 @@ python extract_region_feature.py --config-file configs/X-152-region-c4.yaml --da
 The code will load the final model from `cfg.OUTPUT_DIR`. You can also specify a path to the images folder of your dataset directly, by running:
 
 ```bash
-python extract_region_feature.py --config-file configs/X-152-region-c4.yaml --dataset <dataset_name> --dataset-path <path_to_dataset_images_dir>
+python extract_region_feature.py \
+  --config-file configs/X-152-region-c4.yaml \
+  --dataset <dataset_name> \
+  --dataset-path <path_to_dataset_images_dir>
 ```
 
 The features are saved in `.npy` format which is a dictionary containing these fields:
 
 ```json
 {
-  "bbox": ...,
-  "num_boxes": ...,
-  "objects": ...,
-  "image_height": ...,
-  "image_width": ...,
-  "cls_prob": ...,
-  "features": ...,
+  "bbox": ,
+  "num_boxes": ,
+  "objects": ,
+  "image_height": ,
+  "image_width": ,
+  "cls_prob": ,
+  "features": ,
 }
 
 ```
