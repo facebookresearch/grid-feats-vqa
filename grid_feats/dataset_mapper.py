@@ -1,6 +1,7 @@
 # Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved
 import copy
 import logging
+
 import numpy as np
 import torch
 from fvcore.common.file_io import PathManager
@@ -20,15 +21,16 @@ from detectron2.structures import (
 )
 
 
-def annotations_to_instances_with_attributes(annos, 
-                                             image_size, 
-                                             mask_format="polygon", 
-                                             load_attributes=False, 
-                                             max_attr_per_ins=16):
+def annotations_to_instances_with_attributes(
+    annos, image_size, mask_format="polygon", load_attributes=False, max_attr_per_ins=16
+):
     """
     Extend the function annotations_to_instances() to support attributes
     """
-    boxes = [BoxMode.convert(obj["bbox"], obj["bbox_mode"], BoxMode.XYXY_ABS) for obj in annos]
+    boxes = [
+        BoxMode.convert(obj["bbox"], obj["bbox_mode"], BoxMode.XYXY_ABS)
+        for obj in annos
+    ]
     target = Instances(image_size)
     boxes = target.gt_boxes = Boxes(boxes)
     boxes.clip(image_size)
@@ -52,9 +54,9 @@ def annotations_to_instances_with_attributes(annos,
                     # COCO RLE
                     masks.append(mask_util.decode(segm))
                 elif isinstance(segm, np.ndarray):
-                    assert segm.ndim == 2, "Expect segmentation of 2 dimensions, got {}.".format(
-                        segm.ndim
-                    )
+                    assert (
+                        segm.ndim == 2
+                    ), "Expect segmentation of 2 dimensions, got {}.".format(segm.ndim)
                     # mask array
                     masks.append(segm)
                 else:
@@ -88,6 +90,7 @@ class AttributeDatasetMapper(DatasetMapper):
     """
     Extend DatasetMapper to support attributes.
     """
+
     def __init__(self, cfg, is_train=True):
         super().__init__(cfg, is_train)
 
@@ -118,11 +121,17 @@ class AttributeDatasetMapper(DatasetMapper):
                 transforms = crop_tfm + transforms
 
         image_shape = image.shape[:2]
-        dataset_dict["image"] = torch.as_tensor(np.ascontiguousarray(image.transpose(2, 0, 1)))
+        dataset_dict["image"] = torch.as_tensor(
+            np.ascontiguousarray(image.transpose(2, 0, 1))
+        )
 
         if self.load_proposals:
             utils.transform_proposals(
-                dataset_dict, image_shape, transforms, self.min_box_side_len, self.proposal_topk
+                dataset_dict,
+                image_shape,
+                transforms,
+                self.min_box_side_len,
+                self.proposal_topk,
             )
 
         if not self.is_train:
@@ -141,14 +150,20 @@ class AttributeDatasetMapper(DatasetMapper):
 
             annos = [
                 utils.transform_instance_annotations(
-                    obj, transforms, image_shape, keypoint_hflip_indices=self.keypoint_hflip_indices
+                    obj,
+                    transforms,
+                    image_shape,
+                    keypoint_hflip_indices=self.keypoint_hflip_indices,
                 )
                 for obj in dataset_dict.pop("annotations")
                 if obj.get("iscrowd", 0) == 0
             ]
             instances = annotations_to_instances_with_attributes(
-                annos, image_shape, mask_format=self.mask_format,
-                load_attributes=self.attribute_on, max_attr_per_ins=self.max_attr_per_ins
+                annos,
+                image_shape,
+                mask_format=self.mask_format,
+                load_attributes=self.attribute_on,
+                max_attr_per_ins=self.max_attr_per_ins,
             )
             if self.crop_gen and instances.has("gt_masks"):
                 instances.gt_boxes = instances.gt_masks.get_bounding_boxes()
@@ -161,4 +176,44 @@ class AttributeDatasetMapper(DatasetMapper):
             sem_seg_gt = transforms.apply_segmentation(sem_seg_gt)
             sem_seg_gt = torch.as_tensor(sem_seg_gt.astype("long"))
             dataset_dict["sem_seg"] = sem_seg_gt
+        return dataset_dict
+
+
+class TestDatasetMapper(DatasetMapper):
+    """
+    Extend DatasetMapper for feature extraction.
+    """
+
+    def __init__(self, cfg, is_train=False):
+        super().__init__(cfg, is_train)
+
+    def __call__(self, dataset_dict):
+        dataset_dict = copy.deepcopy(dataset_dict)
+        try:
+            image = utils.read_image(dataset_dict["file_name"], format=self.img_format)
+            utils.check_image_size(dataset_dict, image)
+        except OSError:
+            return
+
+        if "annotations" not in dataset_dict:
+            image, transforms = T.apply_transform_gens(
+                ([self.crop_gen] if self.crop_gen else []) + self.tfm_gens, image
+            )
+        else:
+            if self.crop_gen:
+                crop_tfm = utils.gen_crop_transform_with_instance(
+                    self.crop_gen.get_crop_size(image.shape[:2]),
+                    image.shape[:2],
+                    np.random.choice(dataset_dict["annotations"]),
+                )
+                image = crop_tfm.apply_image(image)
+            image, transforms = T.apply_transform_gens(self.tfm_gens, image)
+            if self.crop_gen:
+                transforms = crop_tfm + transforms
+
+        image_shape = image.shape[:2]
+        dataset_dict["image"] = torch.as_tensor(
+            np.ascontiguousarray(image.transpose(2, 0, 1))
+        )
+
         return dataset_dict

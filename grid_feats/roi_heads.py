@@ -23,6 +23,7 @@ class AttributePredictor(nn.Module):
     loss computation.
 
     """
+
     def __init__(self, cfg, input_dim):
         super().__init__()
 
@@ -76,6 +77,7 @@ class AttributeROIHeads(ROIHeads):
     """
     An extension of ROIHeads to include attribute prediction.
     """
+
     def forward_attribute_loss(self, proposals, box_features):
         proposals, fg_selection_attributes = select_foreground_proposals(
             proposals, self.num_classes
@@ -92,6 +94,7 @@ class AttributeRes5ROIHeads(AttributeROIHeads, Res5ROIHeads):
     """
     An extension of Res5ROIHeads to include attribute prediction.
     """
+
     def __init__(self, cfg, input_shape):
         super(Res5ROIHeads, self).__init__(cfg, input_shape)
 
@@ -122,7 +125,11 @@ class AttributeRes5ROIHeads(AttributeROIHeads, Res5ROIHeads):
         if self.mask_on:
             self.mask_head = build_mask_head(
                 cfg,
-                ShapeSpec(channels=out_channels, width=pooler_resolution, height=pooler_resolution),
+                ShapeSpec(
+                    channels=out_channels,
+                    width=pooler_resolution,
+                    height=pooler_resolution,
+                ),
             )
 
         if self.attribute_on:
@@ -165,12 +172,23 @@ class AttributeRes5ROIHeads(AttributeROIHeads, Res5ROIHeads):
         features = [features[f] for f in self.in_features]
         return self.res5(features[0])
 
+    def get_roi_features(self, features, proposals):
+        assert len(self.in_features) == 1
+
+        features = [features[f] for f in self.in_features]
+        box_features = self._shared_roi_transform(
+            features, [x.proposal_boxes for x in proposals]
+        )
+        pooled_features = box_features.mean(dim=[2, 3])
+        return box_features, pooled_features
+
 
 @ROI_HEADS_REGISTRY.register()
 class AttributeStandardROIHeads(AttributeROIHeads, StandardROIHeads):
     """
     An extension of StandardROIHeads to include attribute prediction.
     """
+
     def __init__(self, cfg, input_shape):
         super(StandardROIHeads, self).__init__(cfg, input_shape)
         self._init_box_head(cfg, input_shape)
@@ -198,12 +216,17 @@ class AttributeStandardROIHeads(AttributeROIHeads, StandardROIHeads):
             pooler_type=pooler_type,
         )
         self.box_head = build_box_head(
-            cfg, ShapeSpec(channels=in_channels, height=pooler_resolution, width=pooler_resolution)
+            cfg,
+            ShapeSpec(
+                channels=in_channels, height=pooler_resolution, width=pooler_resolution
+            ),
         )
         self.box_predictor = FastRCNNOutputLayers(cfg, self.box_head.output_shape)
 
         if self.attribute_on:
-            self.attribute_predictor = AttributePredictor(cfg, self.box_head.output_shape.channels)
+            self.attribute_predictor = AttributePredictor(
+                cfg, self.box_head.output_shape.channels
+            )
 
     def _forward_box(self, features, proposals):
         features = [features[f] for f in self.in_features]
@@ -217,7 +240,9 @@ class AttributeStandardROIHeads(AttributeROIHeads, StandardROIHeads):
                     pred_boxes = self.box_predictor.predict_boxes_for_gt_classes(
                         predictions, proposals
                     )
-                    for proposals_per_image, pred_boxes_per_image in zip(proposals, pred_boxes):
+                    for proposals_per_image, pred_boxes_per_image in zip(
+                        proposals, pred_boxes
+                    ):
                         proposals_per_image.proposal_boxes = Boxes(pred_boxes_per_image)
             losses = self.box_predictor.losses(predictions, proposals)
             if self.attribute_on:
@@ -226,8 +251,10 @@ class AttributeStandardROIHeads(AttributeROIHeads, StandardROIHeads):
 
             return losses
         else:
-            pred_instances, _ = self.box_predictor.inference(predictions, proposals)
-            return pred_instances
+            pred_instances, r_indices = self.box_predictor.inference(
+                predictions, proposals
+            )
+            return pred_instances[0], r_indices[0]
 
     def get_conv5_features(self, features):
         assert len(self.in_features) == 1
@@ -235,3 +262,8 @@ class AttributeStandardROIHeads(AttributeROIHeads, StandardROIHeads):
         features = [features[f] for f in self.in_features]
         return features[0]
 
+    def get_roi_features(self, features, proposals):
+        features = [features[f] for f in self.in_features]
+        box_features = self.box_pooler(features, [x.proposal_boxes for x in proposals])
+        pooled_features = self.box_head(box_features)
+        return box_features, pooled_features
