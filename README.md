@@ -52,13 +52,50 @@ The final model by default should be saved under `./output` of your current work
 We also release the configuration (`configs/R-50-updn.yaml`) for training the region features described in **bottom-up-attention** paper, which is a faithful re-implementation of the original [one](https://github.com/peteanderson80/bottom-up-attention) in Detectron2.
 
 ## Feature Extraction
+
+### Grid Features
+
 Grid feature extraction can be done by simply running once the model is trained (or you can directly download our pre-trained models, see below):
 ```bash
 python extract_grid_feature.py -config-file configs/R-50-grid.yaml --dataset <dataset>
 ```
-and the code will load the final model from `cfg.OUTPUT_DIR` (which one can override in command line) and start extracting features for `<dataset>`, we provide three options for the dataset: `coco_2014_train`, `coco_2014_val` and `coco_2015_test`, they correspond to `train`, `val` and `test` splits of the VQA dataset. The extracted features can be conveniently loaded in [Pythia](https://github.com/facebookresearch/pythia).
+and the code will load the final model from `cfg.OUTPUT_DIR` (which one can override in command line) and start extracting features for `<dataset>`, we provide three options for the dataset: `coco_2014_train`, `coco_2014_val` and `coco_2015_test`, they correspond to `train`, `val` and `test` splits of the VQA dataset. The extracted features can be conveniently loaded in [MMF](https://github.com/facebookresearch/mmf).
 
-To extract features on your customized dataset, you may want to dump the image information into [COCO](http://cocodataset.org/) `.json` format, and add the dataset information to use `extract_grid_feature.py`, or you can hack `extract_grid_feature.py` and directly loop over images. 
+To extract features on your customized dataset, you may want to dump the image information into [COCO](http://cocodataset.org/) `.json` format, and add the dataset information to use `extract_grid_feature.py`, or you can hack `extract_grid_feature.py` and directly loop over images.
+
+### Region Features
+
+For extracting region features use the `extract_region_feature.py` script, run:
+
+```bash
+python extract_region_feature.py --config-file configs/X-152-region-c4.yaml --dataset <dataset>
+```
+
+The code will load the final model from `cfg.OUTPUT_DIR`. You can also specify a path to the images folder of your dataset directly, by running:
+
+```bash
+python extract_region_feature.py \
+  --config-file configs/X-152-region-c4.yaml \
+  --dataset <dataset_name> \
+  --dataset-path <path_to_dataset_images_dir>
+```
+
+The features are saved in `.npy` format which is a dictionary containing these fields:
+
+```json
+{
+  "bbox": ,
+  "num_boxes": ,
+  "objects": ,
+  "image_height": ,
+  "image_width": ,
+  "cls_prob": ,
+  "features": ,
+}
+
+```
+
+`bbox` contains all the extracted bounding boxes, `cls_prob` contains the class probabilities of `objects` present in the bounding boxes, `features` contain the extracted features of each bounding box.
 
 ## Pre-Trained Models and Features
 We release several pre-trained models for grid features: one with R-50 backbone, one with X-101, one with X-152, and one with additional improvements used for the 2020 VQA Challenge (see `X-152-challenge.yaml`). The models can be used directly to extract features. For your convenience, we also release the pre-extracted features for direct download.
@@ -69,6 +106,14 @@ We release several pre-trained models for grid features: one with R-50 backbone,
 | X-101    | 4.3 | <a href="https://dl.fbaipublicfiles.com/grid-feats-vqa/X-101/X-101.pth">model</a>&nbsp;\| &nbsp;<a href="https://dl.fbaipublicfiles.com/grid-feats-vqa/X-101/metrics.json">metrics</a>&nbsp;\| &nbsp;<a href="https://dl.fbaipublicfiles.com/grid-feats-vqa/X-101/X-101-features.tgz">features</a> |
 | X-152    | 4.7 | <a href="https://dl.fbaipublicfiles.com/grid-feats-vqa/X-152/X-152.pth">model</a>&nbsp;\| &nbsp;<a href="https://dl.fbaipublicfiles.com/grid-feats-vqa/X-152/metrics.json">metrics</a>&nbsp;\| &nbsp;<a href="https://dl.fbaipublicfiles.com/grid-feats-vqa/X-152/X-152-features.tgz">features</a> |
 | X-152++  | 3.7 | <a href="https://dl.fbaipublicfiles.com/grid-feats-vqa/X-152pp/X-152pp.pth">model</a>&nbsp;\| &nbsp;<a href="https://dl.fbaipublicfiles.com/grid-feats-vqa/X-152pp/metrics.json">metrics</a>&nbsp;\| &nbsp;<a href="https://dl.fbaipublicfiles.com/grid-feats-vqa/X-152pp/X-152pp-features.tgz">features</a> |
+
+We release pretrained models for region features: X-152 with C4, X-152 with DC5, X-152 with FPN:
+
+| Backbone | AP<sub>50:95</sub> | Download |
+| -------- | ---- | -------- |
+| X-152-region-FPN    | 5.25 | <a href="https://dl.fbaipublicfiles.com/grid-feats-vqa/region-fpn-X-152/region-fpn-X-152.pth">model</a>&nbsp;\| &nbsp;<a href="https://dl.fbaipublicfiles.com/grid-feats-vqa/region-fpn-X-152/fpn-X-152-metrics.json">metrics</a>&nbsp;\| &nbsp;<a href="https://dl.fbaipublicfiles.com/grid-feats-vqa/region-fpn-X-152/region-fpn-X-152-features_fc7.tar.gz">features (fc7)</a> &nbsp;<a href="https://dl.fbaipublicfiles.com/grid-feats-vqa/region-fpn-X-152/region-fpn-X-152-features.tar.gz">features (fc6)</a> |
+| X-152-region-DC5    | 5.60 | <a href="https://dl.fbaipublicfiles.com/grid-feats-vqa/region-dc5-X-152/region-dc5-X-152.pth">model</a>&nbsp;\| &nbsp;<a href="https://dl.fbaipublicfiles.com/grid-feats-vqa/region-dc5-X-152/dc5-X-152-metrics.json">metrics</a>&nbsp;\| &nbsp;<a href="https://dl.fbaipublicfiles.com/grid-feats-vqa/region-dc5-X-152/region-dc5-X-152-features_fc7.tar.gz">features (fc7)</a> |
+| X-152-region-C4  | 5.67 | <a href="https://dl.fbaipublicfiles.com/grid-feats-vqa/region-c4-X-152/region-c4-X-152.pth">model</a>&nbsp;\| &nbsp;<a href="https://dl.fbaipublicfiles.com/grid-feats-vqa/region-c4-X-152/c4-X-152-metrics.json">metrics</a>&nbsp;\| &nbsp;<a href="https://dl.fbaipublicfiles.com/grid-feats-vqa/region-c4-X-152/region-c4-X-152-features.tar.gz">features</a> |
 
 ## License
 
