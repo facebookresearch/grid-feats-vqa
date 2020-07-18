@@ -9,13 +9,32 @@ from detectron2.modeling.roi_heads import (
     build_mask_head,
     select_foreground_proposals,
     ROI_HEADS_REGISTRY,
+    ROI_BOX_HEAD_REGISTRY,
     ROIHeads,
     Res5ROIHeads,
     StandardROIHeads,
 )
+from detectron2.modeling.roi_heads.box_head import FastRCNNConvFCHead
 from detectron2.modeling.roi_heads.fast_rcnn import FastRCNNOutputLayers
 from detectron2.modeling.poolers import ROIPooler
 
+
+@ROI_BOX_HEAD_REGISTRY.register()
+class AttributeFastRCNNConvFCHead(FastRCNNConvFCHead):
+    """
+    Modified version of FastRCNNConvFCHead which output last two FC outputs
+    """
+    def forward(self, x):
+        for layer in self.conv_norm_relus:
+            x = layer(x)
+        y = None
+        if len(self.fcs):
+            if x.dim() > 2:
+                x = torch.flatten(x, start_dim=1)
+            for layer in self.fcs:
+                y = x
+                x = F.relu(layer(y))
+        return x, y
 
 class AttributePredictor(nn.Module):
     """
@@ -180,7 +199,7 @@ class AttributeRes5ROIHeads(AttributeROIHeads, Res5ROIHeads):
             features, [x.proposal_boxes for x in proposals]
         )
         pooled_features = box_features.mean(dim=[2, 3])
-        return box_features, pooled_features
+        return box_features, pooled_features, None
 
 
 @ROI_HEADS_REGISTRY.register()
@@ -231,7 +250,7 @@ class AttributeStandardROIHeads(AttributeROIHeads, StandardROIHeads):
     def _forward_box(self, features, proposals):
         features = [features[f] for f in self.in_features]
         box_features = self.box_pooler(features, [x.proposal_boxes for x in proposals])
-        box_features = self.box_head(box_features)
+        box_features, _ = self.box_head(box_features)
         predictions = self.box_predictor(box_features)
 
         if self.training:
@@ -265,5 +284,5 @@ class AttributeStandardROIHeads(AttributeROIHeads, StandardROIHeads):
     def get_roi_features(self, features, proposals):
         features = [features[f] for f in self.in_features]
         box_features = self.box_pooler(features, [x.proposal_boxes for x in proposals])
-        pooled_features = self.box_head(box_features)
-        return box_features, pooled_features
+        fc7, fc6  = self.box_head(box_features)
+        return box_features, fc7, fc6

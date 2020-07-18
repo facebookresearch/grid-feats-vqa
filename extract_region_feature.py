@@ -53,6 +53,12 @@ def extract_feature_argument_parser():
         default="",
     )
     parser.add_argument(
+        "--feature-name",
+        help="type of feature to extract, for FPN and DC5 models it can be either of the last two FC regression outputs",
+        default="fc7",
+        choices=["fc6", "fc7"],
+    )
+    parser.add_argument(
         "opts",
         help="Modify config options using the command-line",
         default=None,
@@ -61,7 +67,7 @@ def extract_feature_argument_parser():
     return parser
 
 
-def extract_feature_on_dataset(model, data_loader, dump_folder):
+def extract_feature_on_dataset(model, data_loader, dump_folder, feature_name):
     for idx, inputs in enumerate(tqdm.tqdm(data_loader)):
         with torch.no_grad():
             image_id = inputs[0]["image_id"]
@@ -72,7 +78,7 @@ def extract_feature_on_dataset(model, data_loader, dump_folder):
             proposals, _ = model.proposal_generator(images, features)
 
             # pooled features and box predictions
-            _, pooled_features = model.roi_heads.get_roi_features(
+            _, pooled_features, pooled_features_fc6 = model.roi_heads.get_roi_features(
                 features, proposals
             )
             predictions = model.roi_heads.box_predictor(pooled_features)
@@ -81,16 +87,26 @@ def extract_feature_on_dataset(model, data_loader, dump_folder):
             predictions, r_indices = model.roi_heads.box_predictor.inference(
                 predictions, proposals
             )
+            # Create Boxes objects from proposals. Since features are extrracted from
+            # the proposal boxes we use them instead of predicted boxes.
+            box_type = type(proposals[0].proposal_boxes)
+            proposal_bboxes = box_type.cat([p.proposal_boxes for p in proposals])
+            proposal_bboxes.tensor = proposal_bboxes.tensor[r_indices]
+            predictions[0].set("proposal_boxes", proposal_bboxes)
+            predictions[0].remove("pred_boxes")
 
             # postprocess
             height = inputs[0].get("height")
             width = inputs[0].get("width")
             r = postprocessing.detector_postprocess(predictions[0], height, width)
 
-            bboxes = r.get("pred_boxes").tensor
+            bboxes = r.get("proposal_boxes").tensor
             classes = r.get("pred_classes")
             cls_probs = cls_probs[r_indices]
-            pooled_features = pooled_features[r_indices]
+            if feature_name == "fc6" and pooled_features_fc6 is not None:
+                pooled_features = pooled_features_fc6[r_indices]
+            else:
+                pooled_features = pooled_features[r_indices]
 
             assert (
                 bboxes.size(0)
@@ -112,7 +128,7 @@ def extract_feature_on_dataset(model, data_loader, dump_folder):
             np.save(os.path.join(dump_folder, str(image_id) + ".npy"), info)
 
 
-def do_feature_extraction(cfg, model, dataset_name, dataset_path):
+def do_feature_extraction(cfg, model, dataset_name, dataset_path, feature_name):
     with inference_context(model):
         dump_folder = os.path.join(
             cfg.OUTPUT_DIR, "features", dataset_to_folder_mapper[dataset_name]
@@ -123,7 +139,7 @@ def do_feature_extraction(cfg, model, dataset_name, dataset_path):
         else:
             data_loader = build_detection_test_loader_with_attributes(cfg, dataset_name)
 
-        extract_feature_on_dataset(model, data_loader, dump_folder)
+        extract_feature_on_dataset(model, data_loader, dump_folder, feature_name)
 
 
 def setup(args):
@@ -145,7 +161,7 @@ def main(args):
     DetectionCheckpointer(model, save_dir=cfg.OUTPUT_DIR).resume_or_load(
         cfg.MODEL.WEIGHTS, resume=True
     )
-    do_feature_extraction(cfg, model, args.dataset, args.dataset_path)
+    do_feature_extraction(cfg, model, args.dataset, args.dataset_path, args.feature_name)
 
 
 if __name__ == "__main__":

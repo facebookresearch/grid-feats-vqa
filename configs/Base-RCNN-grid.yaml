@@ -15,7 +15,7 @@ MODEL:
     IN_FEATURES: ["res5"]
     NUM_CLASSES: 1600
   ROI_BOX_HEAD:
-    NAME: "FastRCNNConvFCHead"
+    NAME: "AttributeFastRCNNConvFCHead"
     NUM_FC: 2
     POOLER_RESOLUTION: 1
     POOLER_SAMPLING_RATIO: 2
